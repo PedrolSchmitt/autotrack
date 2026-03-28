@@ -144,6 +144,16 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .month-tbl th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;background:var(--bg);border-bottom:1px solid var(--border)}
 .month-tbl td{padding:9px 12px;font-size:13px;border-bottom:1px solid var(--border)}
 .month-tbl .tot-row td{font-weight:700;background:var(--accent-bg);color:var(--accent);border-bottom:none}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.alert-item:last-child{border:none}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sched-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.sched-item:last-child{border:none}
+.sched-badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.sched-ok{background:var(--green-bg);color:var(--green)}
+.sched-warn{background:var(--orange-bg);color:var(--orange)}
+.sched-danger{background:var(--red-bg);color:var(--red)}
+
 @media(max-width:700px){
   .sb{display:none!important}
   main{margin-left:0!important;padding:66px 14px 24px!important}
@@ -208,6 +218,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <div class="ni on" id="ni-dashboard" onclick="goPage('dashboard',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
     <div class="ni" id="ni-abastecimentos" onclick="goPage('abastecimentos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V8l9-6 9 6v14H3z"/><path d="M9 22V12h6v10"/></svg>Abastecimentos</div>
     <div class="ni" id="ni-manutencao" onclick="goPage('manutencao',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Manutenção</div>
+    <div class="ni" id="ni-agendamentos" onclick="goPage('agendamentos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agendamentos</div>
     <div class="nsec" style="margin-top:8px">Configurações</div>
     <div class="ni" id="ni-tipos" onclick="goPage('tipos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Tipos de Manutenção</div>
    </nav>
@@ -222,6 +233,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   </nav>
   <div class="mob-drawer" id="mob-drawer">
    <div class="ni" onclick="goPage('tipos',document.getElementById('ni-tipos'));syncMobNav('tipos');closeMobDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>Tipos de Manutenção</div>
+   <div class="ni" onclick="goPage('agendamentos',document.getElementById('ni-agendamentos'));syncMobNav('agendamentos');closeMobDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agendamentos</div>
    <div class="ni" onclick="openCarModal(null);closeMobDrawer()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Veículo</div>
    <div style="border-top:1px solid var(--border);margin:6px 0"></div>
    <div class="ni" style="color:var(--red)" onclick="doLogout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair</div>
@@ -231,7 +243,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   <main>
    <!-- DASHBOARD -->
    <div id="pg-dashboard" class="page on">
-    <div class="ph"><div><h2 id="dash-title">Dashboard</h2><p id="dash-sub">Selecione um veículo</p></div><div class="ph-r"><button class="btn bp bsm" onclick="openFuelModal(null)">+ Abastecer</button></div></div>
+    <div class="ph"><div><h2 id="dash-title">Dashboard</h2><p id="dash-sub">Selecione um veículo</p></div><div class="ph-r"><button class="btn bg bsm" onclick="gerarPDF()">📊 Relatório PDF</button><button class="btn bp bsm" onclick="openFuelModal(null)">+ Abastecer</button></div></div>
     <div id="dash-no-car" class="empty-state" style="display:none"><div class="ico">🚗</div><h3>Nenhum veículo cadastrado</h3><p>Adicione seu primeiro veículo para começar.</p><button class="btn bp" onclick="openCarModal(null)">+ Adicionar Veículo</button></div>
     <div id="dash-content">
      <div id="oil-alert" style="display:none"></div>
@@ -243,6 +255,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
      <div class="cc">
       <div class="cch"><h3>📅 Gastos de Abastecimento por Mês</h3></div>
       <div class="month-table-wrap"><table class="month-tbl"><thead><tr><th>Mês/Ano</th><th>Qtd.</th><th>Litros</th><th>Valor Total</th><th>Preço Médio/L</th><th>Média km/L</th></tr></thead><tbody id="month-tbody"></tbody></table></div>
+     </div>
+     <div class="cc" id="smart-alerts-card" style="display:none">
+      <div class="cch"><h3>🔔 Alertas Inteligentes</h3></div>
+      <div id="smart-alerts-list"></div>
+     </div>
+     <div class="cc" id="sched-dash-card">
+      <div class="cch"><h3>📅 Próximos Vencimentos</h3><button class="btn bg bsm" onclick="goPage('agendamentos',document.getElementById('ni-agendamentos'))">Ver todos</button></div>
+      <div id="sched-dash-list"></div>
      </div>
      <div class="cc"><div class="cch"><h3>🔧 Últimas Manutenções</h3><button class="btn bg bsm" onclick="goPage('manutencao',document.getElementById('ni-manutencao'))">Ver todas</button></div><div id="dash-maint-list"></div></div>
      <div class="cc" id="oil-status-card" style="display:none"><div class="cch"><h3>🛢️ Status Troca de Óleo</h3></div><div id="oil-status-content"></div></div>
@@ -272,6 +292,15 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <div class="tc" id="maint-table-wrap">
      <div class="tch"><span class="lbl2" id="maint-cnt">–</span><span id="maint-total" style="font-weight:700;font-size:14px;color:var(--accent)"></span></div>
      <div class="ts"><table><thead><tr><th>Data</th><th>Tipo</th><th>KM</th><th>Valor</th><th>Descrição</th><th></th></tr></thead><tbody id="maint-tbody"></tbody></table></div>
+    </div>
+   </div>
+
+   <!-- AGENDAMENTOS -->
+   <div id="pg-agendamentos" class="page">
+    <div class="ph"><div><h2>📅 Agendamentos</h2><p id="sched-sub">Lembretes de vencimento</p></div><div class="ph-r"><button class="btn bp bsm" onclick="openSchedModal(null)">+ Novo</button></div></div>
+    <div id="sched-no-car" class="empty-state" style="display:none"><div class="ico">📅</div><h3>Nenhum veículo selecionado</h3><p>Adicione um veículo primeiro.</p></div>
+    <div id="sched-list-wrap">
+     <div class="cg3" id="sched-grid"></div>
     </div>
    </div>
 
@@ -334,6 +363,30 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
  </div>
 </div>
 
+<div class="ov" id="ov-sched">
+ <div class="modal msm"><div class="mh"><h3 id="sched-modal-title">📅 Novo Agendamento</h3><button class="mcl" onclick="closeOv('ov-sched')">✕</button></div>
+  <div class="mb">
+   <div class="fg"><label class="lbl">Tipo</label>
+    <select class="inp" id="sc-type">
+     <option value="IPVA">📋 IPVA</option>
+     <option value="Seguro">🛡️ Seguro</option>
+     <option value="Licenciamento">📄 Licenciamento</option>
+     <option value="Revisão">🔧 Revisão Periódica</option>
+     <option value="CNH">🪪 CNH</option>
+     <option value="Outro">📌 Outro</option>
+    </select>
+   </div>
+   <div class="fr fg">
+    <div><label class="lbl">Data de Vencimento</label><input type="date" class="inp" id="sc-date"></div>
+    <div><label class="lbl">Valor (R$) — opcional</label><input type="number" step="0.01" class="inp" id="sc-value" placeholder="Ex: 980,00"></div>
+   </div>
+   <div class="fg"><label class="lbl">Observação</label><input type="text" class="inp" id="sc-obs" placeholder="Ex: IPVA 2025 — parcela única"></div>
+   <div id="sc-del-wrap" style="display:none"><div style="border-top:1px solid var(--border);margin:16px 0 14px"></div><button class="btn bd bfw" onclick="deleteSched()">🗑 Remover este agendamento</button></div>
+  </div>
+  <div class="mf"><input type="hidden" id="sc-id"><button class="btn bg" onclick="closeOv('ov-sched')">Cancelar</button><button class="btn bp" onclick="saveSched()">Salvar</button></div>
+ </div>
+</div>
+
 <div class="ov" id="ov-del-fuel">
  <div class="modal msm"><div class="mh"><h3>Remover Abastecimento</h3><button class="mcl" onclick="closeOv('ov-del-fuel')">✕</button></div>
   <div class="mb"><div class="dw">Tem certeza que deseja remover?<br><strong id="del-fuel-ds"></strong></div></div>
@@ -381,9 +434,9 @@ const FUEL_DEMO=[
   {date:'2024-10-05',liters:45.48,value:301.66,km:83073,type:'Aditivada',obs:'Dado de exemplo — pode remover'},
 ];
 
-let CU=null,UID=null,CARS=[],FUELS=[],MAINTS=[],TIPOS=[];
+let CU=null,UID=null,CARS=[],FUELS=[],MAINTS=[],TIPOS=[],SCHEDS=[];
 let ACTIVE_CAR=null;
-let unsubCars=null,unsubFuels=null,unsubMaints=null,unsubTipos=null;
+let unsubCars=null,unsubFuels=null,unsubMaints=null,unsubTipos=null,unsubScheds=null;
 let selectedMType='';
 
 const fmt=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -414,7 +467,7 @@ window.signInGoogle=async()=>{
     }
   }
 };
-window.doLogout=async()=>{[unsubCars,unsubFuels,unsubMaints,unsubTipos].forEach(u=>u&&u());await signOut(auth);CARS=[];FUELS=[];MAINTS=[];TIPOS=[];ACTIVE_CAR=null;document.getElementById('scr-app').style.display='none';document.getElementById('scr-login').style.display='flex';};
+window.doLogout=async()=>{[unsubCars,unsubFuels,unsubMaints,unsubTipos,unsubScheds].forEach(u=>u&&u());await signOut(auth);CARS=[];FUELS=[];MAINTS=[];TIPOS=[];ACTIVE_CAR=null;document.getElementById('scr-app').style.display='none';document.getElementById('scr-login').style.display='flex';};
 
 // Captura resultado do redirect (ao voltar do Google)
 getRedirectResult(auth).then(async result=>{
@@ -476,7 +529,12 @@ function subscribeTipos(){
     renderTiposPage();renderMaintTypePills();
   });
 }
-function selectCar(id){ACTIVE_CAR=id;FUELS=[];MAINTS=[];subscribeFuels(id);subscribeMaints(id);renderSidebarCars();renderAll();}
+function subscribeScheds(carId){
+  if(unsubScheds)unsubScheds();
+  const q=query(collection(db,'users',UID,'cars',carId,'scheds'),orderBy('date','asc'));
+  unsubScheds=onSnapshot(q,snap=>{SCHEDS=snap.docs.map(d=>({id:d.id,...d.data()}));refreshActive();});
+}
+function selectCar(id){ACTIVE_CAR=id;FUELS=[];MAINTS=[];SCHEDS=[];subscribeFuels(id);subscribeMaints(id);subscribeScheds(id);renderSidebarCars();renderAll();}
 function getActiveCar(){return CARS.find(c=>c.id===ACTIVE_CAR)||null;}
 
 function renderSidebarCars(){
@@ -500,8 +558,8 @@ function getEnriched(){
   });
 }
 
-function renderAll(){renderDash();renderFuel();renderMaint();}
-function refreshActive(){const ap=document.querySelector('.page.on');if(!ap)return;const n=ap.id.replace('pg-','');if(n==='dashboard')renderDash();else if(n==='abastecimentos')renderFuel();else if(n==='manutencao')renderMaint();}
+function renderAll(){renderDash();renderFuel();renderMaint();renderScheds();}
+function refreshActive(){const ap=document.querySelector('.page.on');if(!ap)return;const n=ap.id.replace('pg-','');if(n==='dashboard')renderDash();else if(n==='abastecimentos')renderFuel();else if(n==='manutencao')renderMaint();else if(n==='agendamentos')renderScheds();}
 
 function renderDash(){
   const car=getActiveCar();
@@ -556,6 +614,59 @@ function renderDash(){
   </div>
   <div class="oil-bar-bg"><div class="oil-bar-fg" style="width:${pct}%;background:${clr}"></div></div>
   <div style="font-size:11px;color:var(--muted);margin-top:5px">${pct}% do intervalo de troca (10.000 km)</div>`;
+
+  // Smart alerts
+  renderSmartAlerts(enriched,maxKm,lastOil);
+  // Sched dash
+  renderSchedDash();
+}
+
+function renderSmartAlerts(enriched,maxKm,lastOil){
+  const card=document.getElementById('smart-alerts-card');
+  const list=document.getElementById('smart-alerts-list');
+  const alerts=[];
+  // 1. Queda de média
+  const medias=enriched.filter(r=>r.media);
+  if(medias.length>=4){
+    const last3=medias.slice(-3).reduce((s,r)=>s+r.media,0)/3;
+    const prev3=medias.slice(-6,-3).reduce((s,r)=>s+r.media,0)/Math.min(3,medias.slice(-6,-3).length)||last3;
+    const drop=((prev3-last3)/prev3)*100;
+    if(drop>10)alerts.push({cor:'var(--red)',ico:'📉',txt:`Média de consumo caiu <strong>${drop.toFixed(0)}%</strong> nos últimos 3 abastecimentos (${fmtN(last3)} km/L). Verifique pneus, filtro de ar e alinhamento.`});
+  }
+  // 2. Preço subindo
+  if(medias.length>=4){
+    const lastPr=medias.slice(-1)[0]?.vlLitro||0;
+    const avgPr=medias.slice(0,-1).reduce((s,r)=>s+(r.vlLitro||0),0)/(medias.length-1);
+    if(lastPr>avgPr*1.05)alerts.push({cor:'var(--orange)',ico:'📈',txt:`Preço do combustível subiu <strong>${(((lastPr/avgPr)-1)*100).toFixed(0)}%</strong> acima da sua média histórica (R$ ${fmtN(avgPr)}/L → R$ ${fmtN(lastPr)}/L).`});
+  }
+  // 3. Óleo próximo
+  if(lastOil&&maxKm){const since=maxKm-lastOil.km;if(since>=7000&&since<10000)alerts.push({cor:'var(--orange)',ico:'🛢️',txt:`Troca de óleo se aproximando — <strong>${fmtKm(since)} km</strong> rodados desde a última troca. Faltam ${fmtKm(10000-since)} km.`});}
+  if(!alerts.length){card.style.display='none';return;}
+  card.style.display='block';
+  list.innerHTML=alerts.map(a=>`<div class="alert-item"><div class="alert-dot" style="background:${a.cor}"></div><div style="font-size:13px;line-height:1.5">${a.ico} ${a.txt}</div></div>`).join('');
+}
+
+function renderSchedDash(){
+  const el=document.getElementById('sched-dash-list');
+  const today=new Date();today.setHours(0,0,0,0);
+  const upcoming=[...SCHEDS].filter(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    const diff=Math.round((d-today)/86400000);
+    return diff<=60;
+  }).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+  if(!upcoming.length){el.innerHTML=`<p style="color:var(--muted);font-size:13px;padding:8px 0">Nenhum vencimento nos próximos 60 dias.</p>`;return;}
+  const ICONS={IPVA:'📋',Seguro:'🛡️',Licenciamento:'📄',Revisão:'🔧',CNH:'🪪',Outro:'📌'};
+  el.innerHTML=upcoming.map(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    const diff=Math.round((d-today)/86400000);
+    const cls=diff<0?'sched-danger':diff<=15?'sched-warn':'sched-ok';
+    const txt=diff<0?`Vencido há ${Math.abs(diff)} dias`:diff===0?'Vence hoje!':diff===1?'Vence amanhã!':`${diff} dias`;
+    return`<div class="sched-item">
+     <span style="font-size:20px">${ICONS[s.type]||'📌'}</span>
+     <div style="flex:1"><div style="font-weight:600;font-size:13px">${s.type}</div><div style="font-size:12px;color:var(--muted)">${fmtD(s.date)}${s.obs?' · '+s.obs:''}</div></div>
+     <span class="sched-badge ${cls}">${txt}</span>
+    </div>`;
+  }).join('');
 }
 
 function getLastOil(){return[...MAINTS].filter(m=>m.type==='Troca de Óleo').sort((a,b)=>b.date.localeCompare(a.date))[0]||null;}
@@ -627,6 +738,46 @@ function renderMaint(){
   }).join('')||`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Nenhuma manutenção registrada.</td></tr>`;
 }
 
+function renderScheds(){
+  const car=getActiveCar();
+  if(!car){
+    const nc=document.getElementById('sched-no-car'),lw=document.getElementById('sched-list-wrap');
+    if(nc)nc.style.display='block';if(lw)lw.style.display='none';return;
+  }
+  const nc=document.getElementById('sched-no-car'),lw=document.getElementById('sched-list-wrap');
+  if(nc)nc.style.display='none';if(lw)lw.style.display='block';
+  const sub=document.getElementById('sched-sub');
+  if(sub)sub.textContent=`${car.icon||'🚗'} ${car.name}`;
+  const today=new Date();today.setHours(0,0,0,0);
+  const ICONS={IPVA:'📋',Seguro:'🛡️',Licenciamento:'📄',Revisão:'🔧',CNH:'🪪',Outro:'📌'};
+  const COLORS={IPVA:'#1e4f8c',Seguro:'#2a6e4e',Licenciamento:'#7c3aed',Revisão:'#c2410c',CNH:'#d97706',Outro:'#6b7280'};
+  const sorted=[...SCHEDS].sort((a,b)=>a.date.localeCompare(b.date));
+  const grid=document.getElementById('sched-grid');
+  if(!grid)return;
+  if(!sorted.length){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px">📅</div><div>Nenhum agendamento cadastrado.</div></div>`;return;}
+  grid.innerHTML=sorted.map(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    const diff=Math.round((d-today)/86400000);
+    const cls=diff<0?'sched-danger':diff<=15?'sched-warn':'sched-ok';
+    const txt=diff<0?`Vencido há ${Math.abs(diff)} dias`:diff===0?'Vence hoje!':diff===1?'Vence amanhã!':`${diff} dias`;
+    const clr=COLORS[s.type]||'#6b7280';
+    return`<div class="card" style="border-left:4px solid ${clr}">
+     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <span style="font-size:28px">${ICONS[s.type]||'📌'}</span>
+      <span class="sched-badge ${cls}">${txt}</span>
+     </div>
+     <div style="font-weight:700;font-size:15px;margin-bottom:4px">${s.type}</div>
+     <div style="font-size:12px;color:var(--muted);margin-bottom:6px">📆 ${fmtD(s.date)}</div>
+     ${s.value?`<div style="font-weight:700;color:var(--accent);font-size:14px;margin-bottom:4px">${fmt(s.value)}</div>`:''}
+     ${s.obs?`<div style="font-size:12px;color:var(--text2)">${s.obs}</div>`:''}
+     <div style="display:flex;gap:6px;margin-top:12px">
+      <button class="btn bg bxs" onclick="openSchedModal('${s.id}')">✏️ Editar</button>
+      <button class="btn bd bxs" onclick="deleteSchedDirect('${s.id}')">🗑</button>
+     </div>
+    </div>`;
+  }).join('');
+}
+
 function renderTiposPage(){
   document.getElementById('tipos-grid').innerHTML=TIPOS.map((t,i)=>`
    <div class="card" style="border-left:4px solid ${t.color};cursor:pointer" onclick="openTipoModal(${i})">
@@ -642,7 +793,7 @@ function renderMaintTypePills(){
 }
 window.selectMType=(name)=>{selectedMType=name;document.getElementById('m-type-custom').value=name;renderMaintTypePills();};
 
-window.goPage=(name,el)=>{document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('pg-'+name).classList.add('on');if(name==='dashboard')renderDash();else if(name==='abastecimentos')renderFuel();else if(name==='manutencao')renderMaint();else if(name==='tipos')renderTiposPage();};
+window.goPage=(name,el)=>{document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('pg-'+name).classList.add('on');if(name==='dashboard')renderDash();else if(name==='abastecimentos')renderFuel();else if(name==='manutencao')renderMaint();else if(name==='agendamentos')renderScheds();else if(name==='tipos')renderTiposPage();};
 window.syncMobNav=name=>{document.querySelectorAll('.mob-nav-item').forEach(b=>b.classList.remove('on'));const btn=document.getElementById('mni-'+name);if(btn)btn.classList.add('on');};
 window.toggleMobDrawer=()=>{document.getElementById('mob-drawer').classList.toggle('open');document.getElementById('mob-overlay').classList.toggle('open');};
 window.closeMobDrawer=()=>{document.getElementById('mob-drawer').classList.remove('open');document.getElementById('mob-overlay').classList.remove('open');};
@@ -749,6 +900,128 @@ window.saveMaint=async()=>{
 };
 window.openDelMaint=id=>{const r=MAINTS.find(m=>m.id===id);document.getElementById('del-maint-id').value=id;document.getElementById('del-maint-ds').textContent=r?`${r.type} — ${fmtD(r.date)} — ${fmt(r.value)}`:'';document.getElementById('ov-del-maint').classList.add('open');};
 window.confirmDelMaint=async()=>{const id=document.getElementById('del-maint-id').value;showSync(true);try{await deleteDoc(doc(db,'users',UID,'cars',ACTIVE_CAR,'maints',id));closeOv('ov-del-maint');toast('Removido.','ok');}catch(e){toast('Erro.','err');}showSync(false);};
+
+window.openSchedModal=id=>{
+  if(!ACTIVE_CAR){toast('Selecione um veículo primeiro.','err');return;}
+  const s=id?SCHEDS.find(x=>x.id===id):null;
+  document.getElementById('sched-modal-title').textContent=s?'✏️ Editar Agendamento':'📅 Novo Agendamento';
+  document.getElementById('sc-id').value=s?.id||'';
+  document.getElementById('sc-type').value=s?.type||'IPVA';
+  document.getElementById('sc-date').value=s?.date||today();
+  document.getElementById('sc-value').value=s?.value||'';
+  document.getElementById('sc-obs').value=s?.obs||'';
+  document.getElementById('sc-del-wrap').style.display=s?'block':'none';
+  document.getElementById('ov-sched').classList.add('open');
+};
+window.saveSched=async()=>{
+  if(!ACTIVE_CAR){toast('Selecione um veículo.','err');return;}
+  const date=document.getElementById('sc-date').value;
+  if(!date){toast('Informe a data de vencimento.','err');return;}
+  const data={type:document.getElementById('sc-type').value,date,value:+document.getElementById('sc-value').value||0,obs:document.getElementById('sc-obs').value};
+  const id=document.getElementById('sc-id').value;
+  showSync(true);
+  try{
+    if(id)await updateDoc(doc(db,'users',UID,'cars',ACTIVE_CAR,'scheds',id),data);
+    else await addDoc(collection(db,'users',UID,'cars',ACTIVE_CAR,'scheds'),data);
+    closeOv('ov-sched');toast(id?'Agendamento atualizado!':'Agendamento criado!','ok');
+  }catch(e){toast('Erro ao salvar.','err');}
+  showSync(false);
+};
+window.deleteSched=async()=>{
+  const id=document.getElementById('sc-id').value;
+  if(!confirm('Remover este agendamento?'))return;
+  showSync(true);
+  try{await deleteDoc(doc(db,'users',UID,'cars',ACTIVE_CAR,'scheds',id));closeOv('ov-sched');toast('Removido.','ok');}
+  catch(e){toast('Erro.','err');}
+  showSync(false);
+};
+window.deleteSchedDirect=async id=>{
+  if(!confirm('Remover este agendamento?'))return;
+  showSync(true);
+  try{await deleteDoc(doc(db,'users',UID,'cars',ACTIVE_CAR,'scheds',id));toast('Removido.','ok');}
+  catch(e){toast('Erro.','err');}
+  showSync(false);
+};
+
+// ── PDF GENERATOR ──
+window.gerarPDF=()=>{
+  const car=getActiveCar();
+  if(!car){toast('Selecione um veículo.','err');return;}
+  const enriched=getEnriched();
+  const medias=enriched.filter(r=>r.media);
+  const avgMedia=medias.length?medias.reduce((s,r)=>s+r.media,0)/medias.length:0;
+  const lastMedia=medias.length?medias[medias.length-1].media:0;
+  const totalGasto=FUELS.reduce((s,r)=>s+(+r.value||0),0);
+  const totalMaint=MAINTS.reduce((s,r)=>s+(+r.value||0),0);
+  const maxKm=FUELS.length?Math.max(...FUELS.map(r=>+r.km)):0;
+  const minKm=FUELS.length?Math.min(...FUELS.map(r=>+r.km)):0;
+  const lastOil=getLastOil();
+  const oilKm=lastOil?maxKm-lastOil.km:null;
+  const today2=new Date().toLocaleDateString('pt-BR');
+
+  // month table
+  const byMonth={};
+  enriched.forEach(r=>{const[y,m]=r.date.split('-');const k=`${y}-${m}`;if(!byMonth[k])byMonth[k]={year:y,month:m,count:0,liters:0,value:0,mediasArr:[]};const g=byMonth[k];g.count++;g.liters+=+r.liters||0;g.value+=+r.value||0;if(r.media)g.mediasArr.push(r.media);});
+  const MO_FULL2=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const monthRows=Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).map(([,g])=>{
+    const aM=g.mediasArr.length?g.mediasArr.reduce((a,b)=>a+b,0)/g.mediasArr.length:0;
+    const vL=g.liters?g.value/g.liters:0;
+    return`<tr><td>${MO_FULL2[+g.month]} ${g.year}</td><td style="text-align:center">${g.count}</td><td style="text-align:right">${fmtN(g.liters)} L</td><td style="text-align:right;color:#c06c1a;font-weight:600">${fmt(g.value)}</td><td style="text-align:right">${vL?'R$ '+fmtN(vL):'—'}</td><td style="text-align:right;color:#2a6e4e;font-weight:600">${aM?fmtN(aM)+' km/L':'—'}</td></tr>`;
+  }).join('');
+
+  // upcoming scheds
+  const today3=new Date();today3.setHours(0,0,0,0);
+  const ICONS2={IPVA:'📋',Seguro:'🛡️',Licenciamento:'📄','Revisão':'🔧',CNH:'🪪',Outro:'📌'};
+  const schedRows=[...SCHEDS].sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    const diff=Math.round((d-today3)/86400000);
+    const clr=diff<0?'#b83232':diff<=15?'#d97706':'#2a6e4e';
+    const txt=diff<0?`Vencido há ${Math.abs(diff)}d`:diff===0?'Hoje!':diff===1?'Amanhã!':`${diff} dias`;
+    return`<tr><td>${ICONS2[s.type]||'📌'} ${s.type}</td><td>${fmtD(s.date)}</td><td>${s.obs||'—'}</td><td style="color:${clr};font-weight:700">${txt}</td>${s.value?`<td style="text-align:right">${fmt(s.value)}</td>`:'<td>—</td>'}</tr>`;
+  }).join('');
+
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório AutoTrack</title>
+  <style>
+   body{font-family:'Segoe UI',sans-serif;color:#1c1b18;margin:0;padding:32px;font-size:13px}
+   .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid #c06c1a}
+   .header h1{font-size:24px;color:#c06c1a;margin:0}
+   .header p{color:#9b9890;font-size:12px;margin:4px 0 0}
+   .subtitle{font-size:11px;color:#9b9890;text-align:right}
+   .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+   .card{background:#fdf3e8;border:1px solid #e5e3dc;border-radius:8px;padding:14px;border-left:4px solid #c06c1a}
+   .card-lbl{font-size:10px;font-weight:700;color:#9b9890;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+   .card-val{font-size:18px;font-weight:700;color:#1c1b18}
+   .card-sub{font-size:11px;color:#9b9890;margin-top:4px}
+   h2{font-size:14px;font-weight:700;color:#5a574f;text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #e5e3dc}
+   table{width:100%;border-collapse:collapse;margin-bottom:8px}
+   th{text-align:left;padding:7px 10px;font-size:10px;font-weight:700;color:#9b9890;text-transform:uppercase;background:#f5f4f0;border-bottom:1px solid #e5e3dc}
+   td{padding:8px 10px;border-bottom:1px solid #f0ede6;font-size:12px}
+   .oil-bar{height:6px;background:#e5e3dc;border-radius:3px;margin-top:8px;overflow:hidden}
+   .oil-fill{height:100%;border-radius:3px}
+   .footer{margin-top:32px;text-align:center;font-size:11px;color:#9b9890;border-top:1px solid #e5e3dc;padding-top:12px}
+  </style></head><body>
+  <div class="header">
+   <div><h1>🚗 AutoTrack</h1><p>Relatório Executivo — ${car.icon||''} ${car.name} ${car.plate?'('+car.plate+')':''}</p>${car.model?`<p>${car.model} ${car.year||''}</p>`:''}</div>
+   <div class="subtitle">Gerado em ${today2}<br>Por ${CU.displayName||CU.email}</div>
+  </div>
+  <div class="cards">
+   <div class="card"><div class="card-lbl">Média Geral</div><div class="card-val" style="color:#2a6e4e">${fmtN(avgMedia)} km/L</div><div class="card-sub">Última: ${fmtN(lastMedia)} km/L</div></div>
+   <div class="card"><div class="card-lbl">Total Combustível</div><div class="card-val" style="color:#c06c1a">${fmt(totalGasto)}</div><div class="card-sub">${FUELS.length} abastecimentos</div></div>
+   <div class="card"><div class="card-lbl">Total Manutenção</div><div class="card-val" style="color:#1e4f8c">${fmt(totalMaint)}</div><div class="card-sub">${MAINTS.length} registros</div></div>
+   <div class="card"><div class="card-lbl">KM Rodados</div><div class="card-val">${fmtKm(maxKm-minKm)} km</div><div class="card-sub">KM atual: ${fmtKm(maxKm)}</div></div>
+  </div>
+  ${oilKm!==null?`<h2>🛢️ Status Troca de Óleo</h2>
+  <p>Última troca: <strong>${fmtD(lastOil.date)}</strong> · KM: <strong>${fmtKm(lastOil.km)}</strong> · Rodados desde: <strong style="color:${oilKm>8000?'#b83232':oilKm>6000?'#d97706':'#2a6e4e'}">${fmtKm(oilKm)} km</strong></p>
+  <div class="oil-bar"><div class="oil-fill" style="width:${Math.min(100,Math.round(oilKm/10000*100))}%;background:${oilKm>8000?'#b83232':oilKm>6000?'#d97706':'#2a6e4e'}"></div></div>`:''}
+  <h2>📅 Gastos por Mês</h2>
+  <table><thead><tr><th>Mês</th><th style="text-align:center">Qtd.</th><th style="text-align:right">Litros</th><th style="text-align:right">Valor</th><th style="text-align:right">R$/L</th><th style="text-align:right">Média</th></tr></thead><tbody>${monthRows}</tbody></table>
+  ${schedRows?`<h2>📅 Agendamentos</h2><table><thead><tr><th>Tipo</th><th>Vencimento</th><th>Observação</th><th>Status</th><th style="text-align:right">Valor</th></tr></thead><tbody>${schedRows}</tbody></table>`:''}
+  <div class="footer">AutoTrack · Relatório gerado automaticamente · ${today2}</div>
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+};
 
 function renderEmojiGrid(){document.getElementById('t-emoji-grid').innerHTML=TIPO_EMOJIS.map(e=>`<span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;transition:background .15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''" onclick="document.getElementById('t-icon').value='${e}'">${e}</span>`).join('');}
 window.openTipoModal=idx=>{
