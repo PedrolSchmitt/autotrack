@@ -1240,6 +1240,14 @@ function buscarPostosProximos(lat,lng){
         radius:raio,
         keyword:'posto combustivel gasolina'
       },(results,st)=>{
+        // Se API bloqueada ou erro, avança para fallback
+        const FAIL_ST=['REQUEST_DENIED','UNKNOWN_ERROR','INVALID_REQUEST','OVER_QUERY_LIMIT'];
+        if(FAIL_ST.includes(st)){
+          resetBtn();
+          status.innerHTML='⚠️ Busca de postos indisponível. GPS salvo — <strong>digite o nome do posto</strong> abaixo.';
+          sugestoes.innerHTML='<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--muted)">📍 GPS: '+lat.toFixed(5)+', '+lng.toFixed(5)+'</div>';
+          return;
+        }
         if(st===google.maps.places.PlacesServiceStatus.OK&&results.length){
           resetBtn();
           status.textContent='✅ '+results.length+' posto'+(results.length>1?'s':'')+' encontrado'+(results.length>1?'s':'')+' num raio de '+raioTxt+':';
