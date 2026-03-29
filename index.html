@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AutoTrack</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD01VAPzhAPju5GG4zBQaX8ziMLU7x4ydw&libraries=places" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1169,20 +1168,41 @@ window.gerarPDF=()=>{
 // ══════════════════════════════
 let _userLat=null,_userLng=null;
 
+let _googleMapsLoaded=false;
+
+function carregarGoogleMaps(callback){
+  if(typeof google!=='undefined'&&google.maps&&google.maps.places){callback();return;}
+  if(_googleMapsLoaded){
+    const wait=setInterval(()=>{if(typeof google!=='undefined'&&google.maps&&google.maps.places){clearInterval(wait);callback();}},300);
+    return;
+  }
+  _googleMapsLoaded=true;
+  window._gmapsCallback=callback;
+  const s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyD01VAPzhAPju5GG4zBQaX8ziMLU7x4ydw&libraries=places&callback=_gmapsCallback';
+  s.async=true;s.defer=true;
+  s.onerror=()=>{window._gmapsCallback=null;callback();};
+  document.head.appendChild(s);
+}
+
 window.detectarPosto=async()=>{
   const btn=document.getElementById('gps-btn');
   const status=document.getElementById('gps-status');
   const sugestoes=document.getElementById('posto-sugestoes');
   if(!navigator.geolocation){status.textContent='❌ GPS não suportado neste navegador.';return;}
   btn.disabled=true;
-  btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Buscando localização…`;
+  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Buscando localização…';
   status.textContent='';
   sugestoes.innerHTML='';
   navigator.geolocation.getCurrentPosition(
-    pos=>buscarPostosProximos(pos.coords.latitude,pos.coords.longitude),
+    pos=>{
+      const lat=pos.coords.latitude,lng=pos.coords.longitude;
+      status.textContent='📍 Localização obtida! Carregando busca de postos…';
+      carregarGoogleMaps(()=>buscarPostosProximos(lat,lng));
+    },
     err=>{
       btn.disabled=false;
-      btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
+      btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS';
       const msgs={1:'❌ Permissão de GPS negada. Permita o acesso à localização.',2:'❌ GPS indisponível no momento.',3:'❌ Tempo esgotado. Tente novamente.'};
       status.textContent=msgs[err.code]||'❌ Erro ao obter localização.';
     },
