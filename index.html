@@ -1179,7 +1179,7 @@ function carregarGoogleMaps(callback){
   _googleMapsLoaded=true;
   window._gmapsCallback=callback;
   const s=document.createElement('script');
-  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyD01VAPzhAPju5GG4zBQaX8ziMLU7x4ydw&libraries=places&callback=_gmapsCallback';
+  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBcuhAn1H1cWvHxOPBuPedK7MUgC15FGcs&libraries=places&callback=_gmapsCallback';
   s.async=true;s.defer=true;
   s.onerror=()=>{window._gmapsCallback=null;callback();};
   document.head.appendChild(s);
