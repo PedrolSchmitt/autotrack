@@ -1195,43 +1195,68 @@ function buscarPostosProximos(lat,lng){
   const btn=document.getElementById('gps-btn');
   const status=document.getElementById('gps-status');
   const sugestoes=document.getElementById('posto-sugestoes');
-  status.textContent='📍 Localização obtida! Buscando postos próximos…';
 
-  // Usa Google Places API se disponível
+  // Salva coordenadas mesmo sem encontrar posto nomeado
+  document.getElementById('f-posto-lat').value=lat;
+  document.getElementById('f-posto-lng').value=lng;
+
+  const resetBtn=()=>{
+    btn.disabled=false;
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS';
+  };
+
   if(typeof google!=='undefined'&&google.maps&&google.maps.places){
     const map=new google.maps.Map(document.createElement('div'));
     const service=new google.maps.places.PlacesService(map);
-    service.nearbySearch({
-      location:{lat,lng},
-      radius:500,
-      keyword:'posto de combustível'
-    },(results,st)=>{
-      btn.disabled=false;
-      btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
-      if(st===google.maps.places.PlacesServiceStatus.OK&&results.length){
-        status.textContent=`✅ ${results.length} posto${results.length>1?'s':''} encontrado${results.length>1?'s':''} num raio de 500m:`;
-        sugestoes.innerHTML=results.slice(0,4).map((p,i)=>{
-          const dist=calcDist(lat,lng,p.geometry.location.lat(),p.geometry.location.lng());
-          return`<div class="posto-suggestion" onclick="selecionarPosto('${p.place_id}','${p.name.replace(/'/g,"\'")}',${p.geometry.location.lat()},${p.geometry.location.lng()})">
-           <span class="posto-ico">⛽</span>
-           <div class="posto-info">
-            <div class="posto-nm">${p.name}</div>
-            <div class="posto-dist">📍 ${dist}m de distância · ${p.vicinity||''}</div>
-           </div>
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>`;
-        }).join('');
-      } else {
-        status.textContent='⚠️ Nenhum posto encontrado próximo. Digite o nome manualmente.';
-      }
-    });
+    const raios=[500,1000,2000,5000];
+    let tentativa=0;
+
+    function tentarRaio(){
+      const raio=raios[tentativa];
+      const raioTxt=raio>=1000?(raio/1000)+'km':raio+'m';
+      status.textContent='📍 Buscando postos em raio de '+raioTxt+'…';
+      service.nearbySearch({
+        location:{lat,lng},
+        radius:raio,
+        keyword:'posto combustivel gasolina'
+      },(results,st)=>{
+        if(st===google.maps.places.PlacesServiceStatus.OK&&results.length){
+          resetBtn();
+          status.textContent='✅ '+results.length+' posto'+(results.length>1?'s':'')+' encontrado'+(results.length>1?'s':'')+' num raio de '+raioTxt+':';
+          const comDist=results.map(p=>({
+            name:p.name,place_id:p.place_id,vicinity:p.vicinity,
+            lat:p.geometry.location.lat(),lng:p.geometry.location.lng(),
+            dist:calcDist(lat,lng,p.geometry.location.lat(),p.geometry.location.lng())
+          })).sort((a,b)=>a.dist-b.dist);
+          sugestoes.innerHTML=comDist.slice(0,5).map(p=>{
+            const dTxt=p.dist>=1000?(p.dist/1000).toFixed(1)+'km':p.dist+'m';
+            const nm=p.name.replace(/'/g,"\'");
+            return'<div class="posto-suggestion" onclick="selecionarPosto(''+p.place_id+'',''+nm+'','+p.lat+','+p.lng+')">'
+             +'<span class="posto-ico">⛽</span>'
+             +'<div class="posto-info">'
+             +'<div class="posto-nm">'+p.name+'</div>'
+             +'<div class="posto-dist">📍 '+dTxt+' de distância · '+(p.vicinity||'')+'</div>'
+             +'</div>'
+             +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>'
+             +'</div>';
+          }).join('');
+        } else {
+          tentativa++;
+          if(tentativa<raios.length){
+            tentarRaio();
+          } else {
+            resetBtn();
+            status.innerHTML='⚠️ Nenhum posto encontrado num raio de 5km. Sua localização foi salva — <strong>digite o nome do posto manualmente</strong> abaixo.';
+            sugestoes.innerHTML='<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--muted)">📍 GPS capturado: '+lat.toFixed(5)+', '+lng.toFixed(5)+'</div>';
+          }
+        }
+      });
+    }
+    tentarRaio();
   } else {
-    // Fallback sem Google Maps
-    btn.disabled=false;
-    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
-    status.innerHTML=`✅ Localização capturada (${lat.toFixed(5)}, ${lng.toFixed(5)}). <em>Digite o nome do posto abaixo.</em>`;
-    document.getElementById('f-posto-lat').value=lat;
-    document.getElementById('f-posto-lng').value=lng;
+    resetBtn();
+    status.innerHTML='✅ Localização capturada! <strong>Digite o nome do posto</strong> abaixo.';
+    sugestoes.innerHTML='<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--muted)">📍 GPS: '+lat.toFixed(5)+', '+lng.toFixed(5)+'</div>';
   }
 }
 
