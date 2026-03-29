@@ -1330,10 +1330,22 @@ let unsubPostos=null;
 
 function subscribePostos(){
   if(unsubPostos)unsubPostos();
-  unsubPostos=onSnapshot(collection(db,'postos_precos'),snap=>{
-    POSTOS_PRECOS=snap.docs.map(d=>({id:d.id,...d.data()}));
-    if(document.querySelector('#pg-mapa.on'))renderMapa();
-  });
+  try{
+    unsubPostos=onSnapshot(collection(db,'postos_precos'),
+      snap=>{
+        POSTOS_PRECOS=snap.docs.map(d=>({id:d.id,...d.data()}));
+        if(document.querySelector('#pg-mapa.on'))renderMapa();
+      },
+      err=>{
+        // Regra do Firestore não configurada ainda — ignora silenciosamente
+        console.warn('postos_precos: sem permissão ou coleção inexistente.',err.code);
+        POSTOS_PRECOS=[];
+      }
+    );
+  }catch(e){
+    console.warn('subscribePostos error:',e);
+    POSTOS_PRECOS=[];
+  }
 }
 
 window.renderMapa=()=>{
