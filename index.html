@@ -1250,15 +1250,20 @@ function buscarPostosProximos(lat,lng){
           })).sort((a,b)=>a.dist-b.dist);
           sugestoes.innerHTML=comDist.slice(0,5).map(p=>{
             const dTxt=p.dist>=1000?(p.dist/1000).toFixed(1)+'km':p.dist+'m';
-            const nm=p.name.replace(/'/g,"\'");
-            return'<div class="posto-suggestion" onclick="selecionarPosto(''+p.place_id+'',''+nm+'','+p.lat+','+p.lng+')">'
-             +'<span class="posto-ico">⛽</span>'
-             +'<div class="posto-info">'
-             +'<div class="posto-nm">'+p.name+'</div>'
-             +'<div class="posto-dist">📍 '+dTxt+' de distância · '+(p.vicinity||'')+'</div>'
-             +'</div>'
-             +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>'
-             +'</div>';
+            const nm=encodeURIComponent(p.name);
+            const pid=p.place_id;
+            const plat=p.lat;
+            const plng=p.lng;
+            const pname=p.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const pvic=(p.vicinity||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            return `<div class="posto-suggestion" onclick="selecionarPostoEnc('${pid}','${nm}',${plat},${plng})">
+             <span class="posto-ico">⛽</span>
+             <div class="posto-info">
+              <div class="posto-nm">${pname}</div>
+              <div class="posto-dist">📍 ${dTxt} de distância · ${pvic}</div>
+             </div>
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>`;
           }).join('');
         } else {
           tentativa++;
@@ -1288,6 +1293,10 @@ function calcDist(lat1,lng1,lat2,lng2){
   return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
 }
 
+window.selecionarPostoEnc=(placeId,nomeEnc,lat,lng)=>{
+  const nome=decodeURIComponent(nomeEnc);
+  window.selecionarPosto(placeId,nome,lat,lng);
+};
 window.selecionarPosto=(placeId,nome,lat,lng)=>{
   document.getElementById('f-posto').value=nome;
   document.getElementById('f-posto-lat').value=lat;
