@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AutoTrack</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD01VAPzhAPju5GG4zBQaX8ziMLU7x4ydw&libraries=places" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -144,6 +145,20 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .month-tbl th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;background:var(--bg);border-bottom:1px solid var(--border)}
 .month-tbl td{padding:9px 12px;font-size:13px;border-bottom:1px solid var(--border)}
 .month-tbl .tot-row td{font-weight:700;background:var(--accent-bg);color:var(--accent);border-bottom:none}
+.posto-suggestion{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);cursor:pointer;transition:background .15s;border:1px solid var(--border);margin-bottom:6px;background:var(--white)}
+.posto-suggestion:hover{background:var(--accent-bg);border-color:var(--accent)}
+.posto-suggestion .posto-ico{font-size:20px;flex-shrink:0}
+.posto-suggestion .posto-info{flex:1}
+.posto-suggestion .posto-nm{font-size:13px;font-weight:600}
+.posto-suggestion .posto-dist{font-size:11px;color:var(--muted)}
+.posto-suggestion.selected{background:var(--accent-bg);border-color:var(--accent)}
+.gps-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--blue-bg);border:1.5px solid var(--blue);color:var(--blue);border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all .15s;width:100%;justify-content:center}
+.gps-btn:hover{background:var(--blue);color:#fff}
+.gps-btn:disabled{opacity:.5;cursor:not-allowed}
+.mapa-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--green-bg);border:1.5px solid var(--green);color:var(--green);border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all .15s}
+.mapa-btn:hover{background:var(--green);color:#fff}
+.posto-map-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.posto-map-card .preco-tag{font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px}
 .alert-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
 .alert-item:last-child{border:none}
 .alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
@@ -247,6 +262,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <div class="ni" id="ni-abastecimentos" onclick="goPage('abastecimentos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V8l9-6 9 6v14H3z"/><path d="M9 22V12h6v10"/></svg>Abastecimentos</div>
     <div class="ni" id="ni-manutencao" onclick="goPage('manutencao',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Manutenção</div>
     <div class="ni" id="ni-agendamentos" onclick="goPage('agendamentos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agendamentos</div>
+    <div class="ni" id="ni-mapa" onclick="goPage('mapa',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Mapa de Preços</div>
     <div class="nsec" style="margin-top:8px">Configurações</div>
     <div class="ni" id="ni-tipos" onclick="goPage('tipos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Tipos de Manutenção</div>
    </nav>
@@ -260,6 +276,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
    <button class="mob-more-btn" onclick="toggleMobDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg><span>Mais</span></button>
   </nav>
   <div class="mob-drawer" id="mob-drawer">
+   <div class="ni" onclick="goPage('mapa',document.getElementById('ni-mapa'));syncMobNav('mapa');closeMobDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Mapa de Preços</div>
    <div class="ni" onclick="goPage('tipos',document.getElementById('ni-tipos'));syncMobNav('tipos');closeMobDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>Tipos de Manutenção</div>
    <div class="ni" onclick="goPage('agendamentos',document.getElementById('ni-agendamentos'));syncMobNav('agendamentos');closeMobDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agendamentos</div>
    <div class="ni" onclick="openCarModal(null);closeMobDrawer()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar Veículo</div>
@@ -338,6 +355,45 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     </div>
    </div>
 
+   <!-- MAPA DE PREÇOS -->
+   <div id="pg-mapa" class="page">
+    <div class="ph">
+     <div><h2>🗺️ Mapa de Preços</h2><p>Preços colaborativos dos postos da sua cidade</p></div>
+     <div class="ph-r">
+      <select class="sel" id="mapa-filter-tipo" onchange="renderMapa()">
+       <option value="">Todos os combustíveis</option>
+       <option value="Comum">⛽ Comum</option>
+       <option value="Aditivada">⭐ Aditivada</option>
+       <option value="Etanol">🌿 Etanol</option>
+       <option value="Diesel">🚛 Diesel</option>
+       <option value="GNV">🔵 GNV</option>
+      </select>
+     </div>
+    </div>
+    <!-- Info colaborativa -->
+    <div class="cc" style="margin-bottom:20px;background:linear-gradient(135deg,var(--blue-bg),var(--accent-bg));border-color:var(--blue)">
+     <div style="display:flex;align-items:flex-start;gap:14px">
+      <span style="font-size:32px">🤝</span>
+      <div>
+       <div style="font-weight:700;font-size:15px;margin-bottom:4px">Dados Colaborativos</div>
+       <div style="font-size:13px;color:var(--text2);line-height:1.6">Cada abastecimento registrado com GPS contribui automaticamente para este mapa. Quanto mais usuários, mais dados precisos para toda a comunidade!</div>
+      </div>
+     </div>
+    </div>
+    <!-- Stats -->
+    <div class="cg3" id="mapa-stats" style="margin-bottom:20px"></div>
+    <!-- Lista postos -->
+    <div class="cc">
+     <div class="cch"><h3>⛽ Postos com Preços Registrados</h3><span id="mapa-count" style="font-size:12px;color:var(--muted)"></span></div>
+     <div id="mapa-lista"></div>
+    </div>
+    <!-- Seus postos -->
+    <div class="cc" style="margin-top:0">
+     <div class="cch"><h3>📍 Seus Abastecimentos com Localização</h3></div>
+     <div id="mapa-meus"></div>
+    </div>
+   </div>
+
    <!-- TIPOS -->
    <div id="pg-tipos" class="page">
     <div class="ph"><div><h2>⚙️ Tipos de Manutenção</h2><p>Gerencie os tipos disponíveis</p></div><div class="ph-r"><button class="btn bp bsm" onclick="openTipoModal(null)">+ Novo Tipo</button></div></div>
@@ -354,7 +410,21 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
    <div class="fr fg"><div><label class="lbl">Data</label><input type="date" class="inp" id="f-date"></div><div><label class="lbl">Tipo de Combustível</label><select class="inp" id="f-type"><option value="Comum">⛽ Comum</option><option value="Aditivada">⭐ Aditivada</option><option value="Etanol">🌿 Etanol</option><option value="Diesel">🚛 Diesel</option><option value="GNV">🔵 GNV</option></select></div></div>
    <div class="fr fg"><div><label class="lbl">Litros</label><input type="number" step="0.01" class="inp" id="f-liters" placeholder="Ex: 45.50" oninput="calcFuelPreview()"></div><div><label class="lbl">Valor Total (R$)</label><input type="number" step="0.01" class="inp" id="f-value" placeholder="Ex: 286.40" oninput="calcFuelPreview()"></div></div>
    <div class="fg"><label class="lbl">KM do Odômetro</label><input type="number" class="inp" id="f-km" placeholder="Ex: 85711"></div>
-   <div class="fg"><label class="lbl">Observação (opcional)</label><input type="text" class="inp" id="f-obs" placeholder="Ex: Posto Shell, tanque cheio"></div>
+   <!-- POSTO GPS -->
+   <div class="fg">
+    <label class="lbl">📍 Posto de Combustível</label>
+    <button class="gps-btn" id="gps-btn" onclick="detectarPosto()" type="button">
+     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+     Detectar posto pelo GPS
+    </button>
+    <div id="gps-status" style="font-size:12px;color:var(--muted);margin-top:6px;min-height:18px"></div>
+    <div id="posto-sugestoes" style="margin-top:8px"></div>
+    <input type="text" class="inp" id="f-posto" placeholder="Nome do posto (opcional)" style="margin-top:8px;font-size:13px">
+    <input type="hidden" id="f-posto-lat">
+    <input type="hidden" id="f-posto-lng">
+    <input type="hidden" id="f-posto-place-id">
+   </div>
+   <div class="fg"><label class="lbl">Observação (opcional)</label><input type="text" class="inp" id="f-obs" placeholder="Ex: Tanque cheio"></div>
    <div id="f-preview" style="display:none" class="info-box"></div>
   </div>
   <div class="mf"><input type="hidden" id="f-id"><button class="btn bg" onclick="closeOv('ov-fuel')">Cancelar</button><button class="btn bp" onclick="saveFuel()">Salvar</button></div>
@@ -534,6 +604,7 @@ async function startApp(){
   document.getElementById('scr-app').style.display='block';
   subscribeTipos();
   subscribeCars();
+  subscribePostos();
 }
 
 function subscribeCars(){
@@ -838,7 +909,7 @@ function renderMaintTypePills(){
 }
 window.selectMType=(name)=>{selectedMType=name;document.getElementById('m-type-custom').value=name;renderMaintTypePills();};
 
-window.goPage=(name,el)=>{document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('pg-'+name).classList.add('on');if(name==='dashboard')renderDash();else if(name==='abastecimentos')renderFuel();else if(name==='manutencao')renderMaint();else if(name==='agendamentos')renderScheds();else if(name==='tipos')renderTiposPage();};
+window.goPage=(name,el)=>{document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('pg-'+name).classList.add('on');if(name==='dashboard')renderDash();else if(name==='abastecimentos')renderFuel();else if(name==='manutencao')renderMaint();else if(name==='agendamentos')renderScheds();else if(name==='mapa')renderMapa();else if(name==='tipos')renderTiposPage();};
 window.syncMobNav=name=>{document.querySelectorAll('.mob-nav-item').forEach(b=>b.classList.remove('on'));const btn=document.getElementById('mni-'+name);if(btn)btn.classList.add('on');};
 window.toggleMobDrawer=()=>{document.getElementById('mob-drawer').classList.toggle('open');document.getElementById('mob-overlay').classList.toggle('open');};
 window.closeMobDrawer=()=>{document.getElementById('mob-drawer').classList.remove('open');document.getElementById('mob-overlay').classList.remove('open');};
@@ -894,7 +965,16 @@ window.openFuelModal=id=>{
   document.getElementById('f-value').value=r?.value||'';
   document.getElementById('f-km').value=r?.km||'';
   document.getElementById('f-obs').value=r?.obs||'';
+  document.getElementById('f-posto').value=r?.postoNome||'';
+  document.getElementById('f-posto-lat').value=r?.postoLat||'';
+  document.getElementById('f-posto-lng').value=r?.postoLng||'';
+  document.getElementById('f-posto-place-id').value=r?.postoPlaceId||'';
   document.getElementById('f-preview').style.display='none';
+  document.getElementById('gps-status').textContent=r?.postoNome?`📍 Posto: ${r.postoNome}`:'';
+  document.getElementById('posto-sugestoes').innerHTML='';
+  const gpsBtn=document.getElementById('gps-btn');
+  gpsBtn.disabled=false;
+  gpsBtn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
   document.getElementById('ov-fuel').classList.add('open');
 };
 window.calcFuelPreview=()=>{const l=+document.getElementById('f-liters').value;const v=+document.getElementById('f-value').value;const el=document.getElementById('f-preview');if(l&&v){el.style.display='block';el.textContent=`✅ Preço calculado: R$ ${fmtN(v/l)}/litro`;}else el.style.display='none';};
@@ -905,11 +985,27 @@ window.saveFuel=async()=>{
   const value=+document.getElementById('f-value').value;
   const km=+document.getElementById('f-km').value;
   if(!date||!liters||!value||!km){toast('Preencha todos os campos obrigatórios.','err');return;}
+  const postoNome=document.getElementById('f-posto').value.trim();
+  const postoLat=document.getElementById('f-posto-lat').value;
+  const postoLng=document.getElementById('f-posto-lng').value;
+  const postoPlaceId=document.getElementById('f-posto-place-id').value;
   const data={date,liters,value,km,type:document.getElementById('f-type').value,obs:document.getElementById('f-obs').value};
+  if(postoNome)data.postoNome=postoNome;
+  if(postoLat)data.postoLat=+postoLat;
+  if(postoLng)data.postoLng=+postoLng;
+  if(postoPlaceId)data.postoPlaceId=postoPlaceId;
   const id=document.getElementById('f-id').value;
   showSync(true);
-  try{if(id)await updateDoc(doc(db,'users',UID,'cars',ACTIVE_CAR,'fuels',id),data);else await addDoc(collection(db,'users',UID,'cars',ACTIVE_CAR,'fuels'),data);closeOv('ov-fuel');toast(id?'Abastecimento atualizado!':'Abastecimento registrado!','ok');}
-  catch(e){toast('Erro ao salvar.','err');}
+  try{
+    if(id)await updateDoc(doc(db,'users',UID,'cars',ACTIVE_CAR,'fuels',id),data);
+    else await addDoc(collection(db,'users',UID,'cars',ACTIVE_CAR,'fuels'),data);
+    // Salvar dado colaborativo anonimizado
+    if(postoNome&&postoLat&&liters&&value){
+      const vlLitro=value/liters;
+      await salvarDadoColaborativo(postoNome,+postoLat,+postoLng,postoPlaceId,data.type,vlLitro,date);
+    }
+    closeOv('ov-fuel');toast(id?'Abastecimento atualizado!':'Abastecimento registrado! '+(postoNome?'📍 Dado colaborativo salvo!':''),'ok');
+  }catch(e){toast('Erro ao salvar.','err');}
   showSync(false);
 };
 window.openDelFuel=id=>{const r=FUELS.find(f=>f.id===id);document.getElementById('del-fuel-id').value=id;document.getElementById('del-fuel-ds').textContent=r?`${fmtD(r.date)} — ${fmtKm(r.km)} km — ${fmt(r.value)}`:'';document.getElementById('ov-del-fuel').classList.add('open');};
@@ -1066,6 +1162,200 @@ window.gerarPDF=()=>{
   <script>window.onload=()=>window.print();<\/script>
   </body></html>`);
   win.document.close();
+};
+
+// ══════════════════════════════
+// GPS + POSTO DETECTION
+// ══════════════════════════════
+let _userLat=null,_userLng=null;
+
+window.detectarPosto=async()=>{
+  const btn=document.getElementById('gps-btn');
+  const status=document.getElementById('gps-status');
+  const sugestoes=document.getElementById('posto-sugestoes');
+  if(!navigator.geolocation){status.textContent='❌ GPS não suportado neste navegador.';return;}
+  btn.disabled=true;
+  btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Buscando localização…`;
+  status.textContent='';
+  sugestoes.innerHTML='';
+  navigator.geolocation.getCurrentPosition(
+    pos=>buscarPostosProximos(pos.coords.latitude,pos.coords.longitude),
+    err=>{
+      btn.disabled=false;
+      btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
+      const msgs={1:'❌ Permissão de GPS negada. Permita o acesso à localização.',2:'❌ GPS indisponível no momento.',3:'❌ Tempo esgotado. Tente novamente.'};
+      status.textContent=msgs[err.code]||'❌ Erro ao obter localização.';
+    },
+    {enableHighAccuracy:true,timeout:10000,maximumAge:0}
+  );
+};
+
+function buscarPostosProximos(lat,lng){
+  _userLat=lat;_userLng=lng;
+  const btn=document.getElementById('gps-btn');
+  const status=document.getElementById('gps-status');
+  const sugestoes=document.getElementById('posto-sugestoes');
+  status.textContent='📍 Localização obtida! Buscando postos próximos…';
+
+  // Usa Google Places API se disponível
+  if(typeof google!=='undefined'&&google.maps&&google.maps.places){
+    const map=new google.maps.Map(document.createElement('div'));
+    const service=new google.maps.places.PlacesService(map);
+    service.nearbySearch({
+      location:{lat,lng},
+      radius:500,
+      keyword:'posto de combustível'
+    },(results,st)=>{
+      btn.disabled=false;
+      btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
+      if(st===google.maps.places.PlacesServiceStatus.OK&&results.length){
+        status.textContent=`✅ ${results.length} posto${results.length>1?'s':''} encontrado${results.length>1?'s':''} num raio de 500m:`;
+        sugestoes.innerHTML=results.slice(0,4).map((p,i)=>{
+          const dist=calcDist(lat,lng,p.geometry.location.lat(),p.geometry.location.lng());
+          return`<div class="posto-suggestion" onclick="selecionarPosto('${p.place_id}','${p.name.replace(/'/g,"\'")}',${p.geometry.location.lat()},${p.geometry.location.lng()})">
+           <span class="posto-ico">⛽</span>
+           <div class="posto-info">
+            <div class="posto-nm">${p.name}</div>
+            <div class="posto-dist">📍 ${dist}m de distância · ${p.vicinity||''}</div>
+           </div>
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>`;
+        }).join('');
+      } else {
+        status.textContent='⚠️ Nenhum posto encontrado próximo. Digite o nome manualmente.';
+      }
+    });
+  } else {
+    // Fallback sem Google Maps
+    btn.disabled=false;
+    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Detectar posto pelo GPS`;
+    status.innerHTML=`✅ Localização capturada (${lat.toFixed(5)}, ${lng.toFixed(5)}). <em>Digite o nome do posto abaixo.</em>`;
+    document.getElementById('f-posto-lat').value=lat;
+    document.getElementById('f-posto-lng').value=lng;
+  }
+}
+
+function calcDist(lat1,lng1,lat2,lng2){
+  const R=6371000;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+
+window.selecionarPosto=(placeId,nome,lat,lng)=>{
+  document.getElementById('f-posto').value=nome;
+  document.getElementById('f-posto-lat').value=lat;
+  document.getElementById('f-posto-lng').value=lng;
+  document.getElementById('f-posto-place-id').value=placeId;
+  document.querySelectorAll('.posto-suggestion').forEach(el=>el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('gps-status').textContent=`✅ Posto selecionado: ${nome}`;
+};
+
+// ══════════════════════════════
+// SALVAR DADO COLABORATIVO
+// ══════════════════════════════
+async function salvarDadoColaborativo(postoNome,postoLat,postoLng,postoPlaceId,tipo,vlLitro,date){
+  if(!postoNome||!postoLat||!postoLng)return;
+  try{
+    const postoId=postoPlaceId||btoa(postoNome).replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+    const postoRef=doc(db,'postos_precos',postoId);
+    const snap=await getDoc(postoRef);
+    const now=new Date().toISOString();
+    const precoKey=tipo.toLowerCase().replace(/[^a-z]/g,'');
+    if(snap.exists()){
+      const d=snap.data();
+      const precos=d.precos||{};
+      precos[precoKey]={valor:vlLitro,data:date,atualizadoEm:now};
+      await updateDoc(postoRef,{precos,nome:postoNome,lat:postoLat,lng:postoLng,placeId:postoPlaceId||'',totalRegistros:(d.totalRegistros||0)+1,ultimaAtualizacao:now});
+    } else {
+      const precos={};precos[precoKey]={valor:vlLitro,data:date,atualizadoEm:now};
+      await setDoc(postoRef,{nome:postoNome,lat:postoLat,lng:postoLng,placeId:postoPlaceId||'',precos,totalRegistros:1,ultimaAtualizacao:now,criadoEm:now});
+    }
+    console.log('Dado colaborativo salvo para:',postoNome);
+  }catch(e){console.warn('Erro ao salvar dado colaborativo:',e);}
+}
+
+// ══════════════════════════════
+// MAPA DE PREÇOS
+// ══════════════════════════════
+let POSTOS_PRECOS=[];
+let unsubPostos=null;
+
+function subscribePostos(){
+  if(unsubPostos)unsubPostos();
+  unsubPostos=onSnapshot(collection(db,'postos_precos'),snap=>{
+    POSTOS_PRECOS=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(document.querySelector('#pg-mapa.on'))renderMapa();
+  });
+}
+
+window.renderMapa=()=>{
+  const filtroTipo=document.getElementById('mapa-filter-tipo')?.value||'';
+  const tipoKey=filtroTipo.toLowerCase().replace(/[^a-z]/g,'')||null;
+
+  // Stats
+  const statsEl=document.getElementById('mapa-stats');
+  if(statsEl){
+    const totalPostos=POSTOS_PRECOS.length;
+    const totalRegistros=POSTOS_PRECOS.reduce((s,p)=>s+(p.totalRegistros||0),0);
+    // preço médio comum
+    const comuns=POSTOS_PRECOS.filter(p=>p.precos?.comum?.valor).map(p=>+p.precos.comum.valor);
+    const mediaComum=comuns.length?comuns.reduce((a,b)=>a+b,0)/comuns.length:0;
+    statsEl.innerHTML=`
+     <div class="card" style="border-left:4px solid var(--accent)"><div class="clbl">Postos Mapeados</div><div class="cval c-a">${totalPostos}</div><div class="csub">com preços registrados</div></div>
+     <div class="card" style="border-left:4px solid var(--blue)"><div class="clbl">Total de Registros</div><div class="cval c-b">${totalRegistros}</div><div class="csub">abastecimentos com GPS</div></div>
+     <div class="card" style="border-left:4px solid var(--green)"><div class="clbl">Média Gasolina Comum</div><div class="cval c-g">${mediaComum?'R$ '+fmtN(mediaComum):'—'}</div><div class="csub">média colaborativa</div></div>`;
+  }
+
+  // Lista postos
+  const listaEl=document.getElementById('mapa-lista');
+  const countEl=document.getElementById('mapa-count');
+  if(!listaEl)return;
+
+  let postos=[...POSTOS_PRECOS];
+  if(tipoKey)postos=postos.filter(p=>p.precos&&p.precos[tipoKey]);
+  postos.sort((a,b)=>(b.totalRegistros||0)-(a.totalRegistros||0));
+
+  if(countEl)countEl.textContent=`${postos.length} posto${postos.length!==1?'s':''}`;
+
+  const TIPOS_LABEL={comum:'⛽ Comum',aditivada:'⭐ Aditivada',etanol:'🌿 Etanol',diesel:'🚛 Diesel',gnv:'🔵 GNV'};
+
+  if(!postos.length){
+    listaEl.innerHTML=`<div style="text-align:center;padding:32px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px">🗺️</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">Nenhum posto mapeado ainda</div><div style="font-size:13px">Registre abastecimentos com GPS para começar a popular o mapa!</div></div>`;
+    return;
+  }
+
+  listaEl.innerHTML=postos.map(p=>{
+    const precosList=Object.entries(p.precos||{}).map(([k,v])=>`<span class="preco-tag" style="background:var(--accent-bg);color:var(--accent)">${TIPOS_LABEL[k]||k}: R$ ${fmtN(v.valor)}</span>`).join(' ');
+    const diasAtras=p.ultimaAtualizacao?Math.round((new Date()-new Date(p.ultimaAtualizacao))/86400000):null;
+    return`<div class="posto-map-card">
+     <span style="font-size:28px">⛽</span>
+     <div style="flex:1">
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px">${p.nome}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px">${precosList}</div>
+      <div style="font-size:11px;color:var(--muted)">${p.totalRegistros||0} registro${(p.totalRegistros||0)!==1?'s':''}${diasAtras!==null?' · atualizado '+( diasAtras===0?'hoje':diasAtras===1?'ontem':'há '+diasAtras+' dias'):''}</div>
+     </div>
+     ${p.lat?`<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" class="mapa-btn">🗺️ Ver</a>`:''}
+    </div>`;
+  }).join('');
+
+  // Meus abastecimentos com GPS
+  const meusEl=document.getElementById('mapa-meus');
+  if(meusEl){
+    const comGps=FUELS.filter(f=>f.postoLat&&f.postoNome);
+    if(!comGps.length){meusEl.innerHTML=`<p style="color:var(--muted);font-size:13px;padding:8px 0">Nenhum abastecimento com localização ainda. Use o botão GPS ao registrar um abastecimento!</p>`;return;}
+    meusEl.innerHTML=[...comGps].reverse().slice(0,10).map(f=>`
+     <div class="posto-map-card">
+      <span style="font-size:22px">⛽</span>
+      <div style="flex:1">
+       <div style="font-weight:600;font-size:13px">${f.postoNome}</div>
+       <div style="font-size:12px;color:var(--muted)">${fmtD(f.date)} · ${f.type} · R$ ${fmtN(f.value/f.liters)}/L</div>
+      </div>
+      <a href="https://maps.google.com/?q=${f.postoLat},${f.postoLng}" target="_blank" class="mapa-btn" style="font-size:11px;padding:5px 10px">🗺️</a>
+     </div>`).join('');
+  }
 };
 
 function renderEmojiGrid(){document.getElementById('t-emoji-grid').innerHTML=TIPO_EMOJIS.map(e=>`<span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;transition:background .15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background=''" onclick="document.getElementById('t-icon').value='${e}'">${e}</span>`).join('');}
