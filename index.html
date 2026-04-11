@@ -556,19 +556,12 @@ window.signInGoogle=async()=>{
   const p=new GoogleAuthProvider();
   p.setCustomParameters({prompt:'select_account'});
   const st=document.getElementById('login-status');
-  st.textContent='Abrindo login do Google…';
+  st.textContent='Redirecionando para o Google…';
   try{
-    // tenta popup primeiro (funciona fora de iframe)
-    await signInWithPopup(auth,p);
+    await signInWithRedirect(auth,p);
   }catch(e){
-    if(['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request','auth/operation-not-supported-in-this-environment'].includes(e.code)){
-      st.textContent='Redirecionando para o Google…';
-      try{await signInWithRedirect(auth,p);}
-      catch(e2){st.textContent='Erro: '+e2.message;}
-    } else {
-      st.textContent='Erro ('+e.code+'): abra o arquivo num navegador ou hospede-o.';
-      console.error(e);
-    }
+    st.textContent='Erro ao entrar: '+e.message;
+    console.error(e);
   }
 };
 window.doLogout=async()=>{[unsubCars,unsubFuels,unsubMaints,unsubTipos,unsubScheds].forEach(u=>u&&u());await signOut(auth);CARS=[];FUELS=[];MAINTS=[];TIPOS=[];ACTIVE_CAR=null;document.getElementById('scr-app').style.display='none';document.getElementById('scr-login').style.display='flex';};
