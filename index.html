@@ -556,12 +556,25 @@ window.signInGoogle=async()=>{
   const p=new GoogleAuthProvider();
   p.setCustomParameters({prompt:'select_account'});
   const st=document.getElementById('login-status');
-  st.textContent='Redirecionando para o Google…';
+  // Tenta popup primeiro — mais confiável para GitHub Pages
   try{
-    await signInWithRedirect(auth,p);
+    st.textContent='Abrindo login do Google…';
+    const result=await signInWithPopup(auth,p);
+    if(result.user) await startApp();
   }catch(e){
-    st.textContent='Erro ao entrar: '+e.message;
-    console.error(e);
+    // Se popup bloqueado, usa redirect
+    if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
+      st.textContent='Redirecionando para o Google…';
+      try{ await signInWithRedirect(auth,p); }
+      catch(e2){ st.textContent='Erro: '+e2.message; }
+    } else if(e.code==='auth/unauthorized-domain'){
+      st.textContent='❌ Domínio não autorizado. Verifique as configurações do Firebase.';
+    } else {
+      // Fallback para redirect em qualquer outro erro
+      st.textContent='Redirecionando para o Google…';
+      try{ await signInWithRedirect(auth,p); }
+      catch(e2){ st.textContent='Erro: '+e2.message; }
+    }
   }
 };
 window.doLogout=async()=>{[unsubCars,unsubFuels,unsubMaints,unsubTipos,unsubScheds].forEach(u=>u&&u());await signOut(auth);CARS=[];FUELS=[];MAINTS=[];TIPOS=[];ACTIVE_CAR=null;document.getElementById('scr-app').style.display='none';document.getElementById('scr-login').style.display='flex';};
